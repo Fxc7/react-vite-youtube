@@ -1,0 +1,83 @@
+* {
+  padding: 0;
+  margin: 0;
+  font-family: "Prompt", sans-serif;
+}
+
+body,
+.card {
+  background: rgb(34, 193, 195);
+  background: -moz-linear-gradient(0deg, rgba(34, 193, 195, 1) 0%, rgba(253, 187, 45, 1) 100%);
+  background: -webkit-linear-gradient(0deg, rgba(34, 193, 195, 1) 0%, rgba(253, 187, 45, 1) 100%);
+  background: linear-gradient(0deg, rgba(34, 193, 195, 1) 0%, rgba(253, 187, 45, 1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#22c1c3", endColorstr="#fdbb2d", GradientType=1);
+}
+
+.card button {
+  margin: 5px 0;
+}
+
+main {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.border-1-black {
+  border: 1px solid rgb(1, 0, 0);
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
+.box-3d {
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 2px 16px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.15);
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.container input {
+  color: rgb(255, 255, 255);
+  cursor: text;
+}
+
+img {
+  height: 304px;
+  width: auto;
+}
+
+.channel {
+  text-decoration: none;
+}
+
+div.list-group {
+  background: none;
+}
+
+div span,
+div p,
+div a {
+  font-size: small;
+  font-weight: 600;
+}
+
+footer {
+  align-items: center;
+  text-align: center;
+  padding-bottom: 27px;
+}
