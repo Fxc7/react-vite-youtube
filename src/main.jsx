@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 import config from '../config.js';
 
-document.querySelector('title').innerHTML = config.title;
+document.querySelector('title').innerHTML = config.configs.title;
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />

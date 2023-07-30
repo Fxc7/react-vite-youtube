@@ -16,12 +16,13 @@ function App() {
       setUrl('');
       return swal('Info!!!', 'Invalid URL, please enter a YouTube URL', 'info');
     } else {
+      document.querySelector('input[name="url"]').value = '';
       return setUrl(value);
     }
   };
 
   const handleDownload = () => {
-    const inputField = document.querySelector('input[type=url]');
+    const inputField = document.querySelector('input[name=url]');
     const value = inputField.value.trim();
     return handleInputChange(value);
   };
@@ -47,7 +48,7 @@ function App() {
         <YoutubeComponent url={url} />
         <Container className="pb-5 pt-5 mt-5 mb-5 box-3d align-items-center">
           <ImYoutube size={150} />
-          <input type="url" placeholder="input url" className="btn btn-block btn-outline-dark bg-transparent btn-lg" onKeyPress={handleKeyPress} />
+          <input name="url" type="url" placeholder="input url" className="btn btn-block btn-outline-dark bg-transparent btn-lg" onKeyPress={handleKeyPress} />
           <button className="btn btn-lg btn-block btn-danger" onClick={handleDownload}>submit</button>
         </Container>
       </main>
