@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ImYoutube, ImYoutube2 } from "react-icons/im";
-import { Navbar, Container } from 'react-bootstrap';
+import { Navbar, Container, Row } from 'react-bootstrap';
 
 import "./App.css";
 import YoutubeComponent from "./component/YoutubeComponent.jsx";
@@ -38,22 +38,29 @@ function App() {
   return (
     <div>
       <Navbar className="box-3d">
-        <Container className="align-items-center text-center">
+        <Container className="align-items-center text-center animate__animated animate__fadeIn">
           <Navbar.Brand>
             <ImYoutube2 size={40} />{' '}Downloader
           </Navbar.Brand>
         </Container>
       </Navbar>
       <main>
-        <YoutubeComponent url={url} />
-        <Container className="pb-5 pt-5 mt-5 mb-5 box-3d align-items-center">
-          <ImYoutube size={150} />
-          <input name="url" type="url" placeholder="input url" className="btn btn-block btn-outline-dark bg-transparent btn-lg" onKeyPress={handleKeyPress} />
-          <button className="btn btn-lg btn-block btn-danger" onClick={handleDownload}>submit</button>
-        </Container>
+        <div className="content">
+          <Container>
+            <Row className="box-3d text-center">
+              <ImYoutube size={180} className="animate__animated animate__fadeIn" />
+              <input style={{ color: 'black', fontSize: '14px', cursor: 'text' }} name="url" type="url" placeholder="input url" className="btn btn-outline-dark bg-transparent btn-lg animate__animated animate__fadeIn" onKeyPress={handleKeyPress} />
+              <button className="btn btn-lg btn-danger animate__animated animate__fadeIn" onClick={handleDownload}>submit</button>
+              <p className="text-sm animate__animated animate__fadeIn" style={{display: 'flow'}}>Download YouTube videos and audio from source!</p>
+            </Row>
+            <Row>
+              <YoutubeComponent url={url} />
+            </Row>
+          </Container>
+        </div>
       </main>
       <footer>
-        <p>&copy; 2023 Farhannnn, Inc - All Right Reserved</p>
+        <p className="animate__animated animate__fadeIn">&copy; 2023 Farhannnn, Inc - All Right Reserved</p>
       </footer>
     </div>
   );

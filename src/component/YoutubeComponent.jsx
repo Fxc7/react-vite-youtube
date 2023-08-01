@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, ListGroup, Modal, Button, Placeholder, Spinner, ProgressBar } from 'react-bootstrap';
+import { Card, ListGroup, Modal, Button, Placeholder, Spinner, ProgressBar, Collapse, Container } from 'react-bootstrap';
 import { BiUserCircle, BiGlobe, BiCategory } from 'react-icons/bi';
 import { BsEyeFill, BsSpeedometer2 } from 'react-icons/bs';
 import { GiDuration } from 'react-icons/gi';
@@ -29,13 +29,13 @@ const YoutubeComponent = ({ url }) => {
     const handleSetAll = () => {
         setSpeedDownload(0);
         setSizeMedia(null);
+        setUrlDownload(null);
         setProgressDownload(null);
         setProgressSizeDownload(null);
         setDownload(false);
     };
     const handleDownloading = () => setDownload(true);
-    const handleClose = () => setShow(false);
-    const handleShow = () => setShow(true);
+    const handleDescription = () => setShow(!show);
     const handleMediaClose = (type) => type === 'audio' ? setShowAudio(false) : setShowVideo(false);
     const handleMediaShow = (type) => type === 'audio' ? setShowAudio(true) : setShowVideo(true);
 
@@ -43,13 +43,13 @@ const YoutubeComponent = ({ url }) => {
     const downloadMedia = async (link) => {
         try {
             const startTime = Date.now();
-            const response = await fetch(`https://cors-anywhere.herokuapp.com/${link}`, {
-                method: 'get',
-                mode: 'cors',
+            const response = await fetch(`${configs.url}${link}`, {
+                method: 'GET'
             });
 
             if (!response.ok) {
                 setError('Failed to fetch the media.');
+                handleSetAll();
                 return;
             }
 
@@ -120,14 +120,13 @@ const YoutubeComponent = ({ url }) => {
                 setLoading(true);
                 setError(null);
                 try {
-                    const videoDataResponse = await fetch(`https://api-fxc7.cloud.okteto.net/api/download/youtube?url=${url}&apikey=${configs.apikey}`, {
-                        method: 'GET'
-                    }).then(response => response.json());
-                    if (typeof videoDataResponse === 'object' && videoDataResponse.status) {
+                    const videoDataResponse = await fetch(`${configs.url}youtube/${url}`).then(response => response.json());
+                    
+                    if (typeof videoDataResponse === 'object' && videoDataResponse) {
                         setLoading(false);
                         swal('Success', 'Successfully fetched video data', 'success');
-                        setTitleDownload('xcoders_-_' + videoDataResponse.result.title.replaceAll(' ', '_'));
-                        setVideoData(videoDataResponse.result);
+                        setTitleDownload('xcoders_-_' + videoDataResponse.title.replaceAll(' ', '_'));
+                        setVideoData(videoDataResponse);
                     } else {
                         setError('Error getting video data.');
                     }
@@ -149,19 +148,26 @@ const YoutubeComponent = ({ url }) => {
 
     if (loading) {
         return (
-            <div className="mt-5 ml-3 align-items-center box-3d">
-                <Card>
-                    <Card.Img variant="top" src="https://placehold.co/600x400?font=montserrat&text=Loading..." />
+            <div className="loading animate__animated animate__fadeIn">
+                <Card className="text-center box-3d">
+                    <Card.Img variant="top" src="https://placehold.co/943x504/black/white?font=montserrat&text=Loading..." />
                     <Card.Body>
                         <Placeholder as={Card.Title} animation="glow">
-                            <Placeholder xs={6} />
+                            <Placeholder xs={10} />
                         </Placeholder>
                         <Placeholder as={Card.Text} animation="glow">
-                            <Placeholder xs={7} /> <Placeholder xs={4} /> <Placeholder xs={4} />{' '}
-                            <Placeholder xs={6} /> <Placeholder xs={8} />
+                            <Placeholder xs={6} />
+                            <br />
+                            <Placeholder xs={7} />
+                            <br />
+                            <Placeholder xs={5} />
+                            <br />
+                            <Placeholder xs={4} />
+                            <br />
+                            <Placeholder xs={6} />
                         </Placeholder>
-                        <Placeholder.Button variant="primary" xs={6} />{' '}
-                        <Placeholder.Button variant="primary" xs={6} />
+                        <Placeholder.Button variant="primary" xs={8} />
+                        <Placeholder.Button variant="primary" xs={8} />
                     </Card.Body>
                 </Card>
             </div>
@@ -170,21 +176,6 @@ const YoutubeComponent = ({ url }) => {
     if (videoData) {
         return (
             <>
-                <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false}>
-                    <Modal.Header>
-                        <Modal.Title>Description</Modal.Title>
-                    </Modal.Header>
-                    {
-                        videoData?.description ? <Modal.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                            {videoData.description}
-                        </Modal.Body> : <></>
-                    }
-                    <Modal.Footer>
-                        <Button variant="danger" onClick={handleClose}>
-                            Close
-                        </Button>
-                    </Modal.Footer>
-                </Modal>
                 <Modal show={showAudio ? showAudio : showVideo} onHide={() => handleMediaClose(showAudio ? 'audio' : 'video')} backdrop="static" keyboard={false} centered>
                     <Modal.Header>
                         <Modal.Title>Downloaded {showAudio ? 'Audio' : 'Video'}</Modal.Title>
@@ -193,10 +184,12 @@ const YoutubeComponent = ({ url }) => {
                         {
                             download ? (
                                 <>
-                                    <p style={{ fontSize: 'small' }}><BsSpeedometer2 size={17} /> Download speed on your network.</p>
-                                    {`${sizeMedia || 0}/${progressSizeDownload || 0}`} {
-                                        speedDownload ? `${speedDownload.toFixed(2)} KB/s` : ''
-                                    }
+                                    <p style={{ fontSize: 'small' }}>Download speed on your network.</p>
+                                    <p style={{ fontSize: 'small' }}>
+                                        <BsSpeedometer2 size={17} /> {`${sizeMedia || 0}/${progressSizeDownload || 0}`} {
+                                            speedDownload ? `${speedDownload.toFixed(2)} KB/s` : ''
+                                        }
+                                    </p>
                                     <ProgressBar animated now={progressDownload || 0} label={`${progressDownload || 0}%`} />
                                 </>
                             ) : <p style={{ fontSize: 'small' }}>Do you want to download this media? if so, press the download button to download the media and if you don't want to download the media, just press the cancel button.</p>
@@ -218,19 +211,47 @@ const YoutubeComponent = ({ url }) => {
                         </Button>
                     </Modal.Footer>
                 </Modal>
-                <Card className="align-items-center ml-3 mt-5 box-3d">
+                <Card className="align-items-center box-3d animate__animated animate__fadeIn animate__delay-1s">
                     <Card.Img variant="top" src={videoData.thumbnail} alt="Video Thumbnail" />
                     <Card.Body className="text-center">
                         <ListGroup className="list-group-flush justify-content-between" style={{ borderRadius: '5px' }}>
-                            <ListGroup.Item variant="primary"><span className="text-sm">{videoData.title}</span></ListGroup.Item>
-                            <ListGroup.Item variant="primary"><Card.Link className="channel" href={videoData.channel_url} target="_blank"><BiUserCircle size={19} /> {videoData.channel_name}</Card.Link></ListGroup.Item>
-                            <ListGroup.Item variant="primary"><GiDuration /> <span className="duration">{videoData.duration}</span></ListGroup.Item>
-                            <ListGroup.Item variant="primary"><BiGlobe /> <span className="published">{videoData.published_at}</span></ListGroup.Item>
-                            <ListGroup.Item variant="primary"><BiCategory /> <span className="category">{videoData.category}</span></ListGroup.Item>
-                            <ListGroup.Item variant="primary"><BsEyeFill /> <span className="views">{videoData.views_count}</span></ListGroup.Item>
-                            <ListGroup.Item action variant="primary" onClick={handleShow}><Card.Text>Click Show Description</Card.Text></ListGroup.Item>
+                            {
+
+                                videoData?.title ? <ListGroup.Item variant="primary"><span className="text-sm">{videoData.title}</span></ListGroup.Item> : ''
+                            }
+                            {
+                                videoData?.channel_name ? <ListGroup.Item variant="primary"><Card.Link className="channel" href={videoData.channel_url} target="_blank"><BiUserCircle size={19} /> {videoData.channel_name}</Card.Link></ListGroup.Item> : ''
+                            }
+                            {
+                                <ListGroup.Item variant="primary"><GiDuration /> <span className="duration">{videoData.duration}</span></ListGroup.Item>
+                            }
+                            {
+                                videoData?.published_at ? <ListGroup.Item variant="primary"><BiGlobe /> <span className="published">{videoData.published_at}</span></ListGroup.Item> : ''
+                            }
+                            {
+                                videoData?.category ? <ListGroup.Item variant="primary"><BiCategory /> <span className="category">{videoData.category}</span></ListGroup.Item> : ''
+                            }
+                            {
+                                videoData?.views_count ? <ListGroup.Item variant="primary"><BsEyeFill /> <span className="views">{videoData.views_count}</span></ListGroup.Item> : ''
+                            }
+                            {
+                                videoData?.description ? <ListGroup.Item action variant="primary" onClick={handleDescription} aria-controls="collapse-description" aria-expanded={show}>
+                                    <Card.Text>Click {!show ? 'Show' : 'Hide'} Description</Card.Text>
+                                </ListGroup.Item> : ''
+                            }
+                            {
+                                show ? <ListGroup.Item className="animate__animated animate__fadeIn" variant={show ? 'primary' : ''}>
+                                    <Collapse in={show}>
+                                        <div id="collapse-description">
+                                            <Card.Text>
+                                                {videoData.description}
+                                            </Card.Text>
+                                        </div>
+                                    </Collapse>
+                                </ListGroup.Item> : ''
+                            }
                         </ListGroup>
-                        <div className="pt-5 d-flex justify-content-between">
+                        <div className="download-button">
                             <Button className="px-5" onClick={() => {
                                 handleMediaShow('video');
                                 setExtension('mp4');

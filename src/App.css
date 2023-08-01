@@ -4,13 +4,13 @@
   font-family: "Prompt", sans-serif;
 }
 
-body,
-.card {
+body {
   background: rgb(34, 193, 195);
   background: -moz-linear-gradient(0deg, rgba(34, 193, 195, 1) 0%, rgba(253, 187, 45, 1) 100%);
   background: -webkit-linear-gradient(0deg, rgba(34, 193, 195, 1) 0%, rgba(253, 187, 45, 1) 100%);
   background: linear-gradient(0deg, rgba(34, 193, 195, 1) 0%, rgba(253, 187, 45, 1) 100%);
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#22c1c3", endColorstr="#fdbb2d", GradientType=1);
+  min-height: 100vh;
 }
 
 .card button {
@@ -44,21 +44,67 @@ main {
 }
 
 .container {
+  flex-direction: column-reverse;
+}
+
+.content .container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding: 50px;
   gap: 20px;
 }
 
-.container input {
-  color: rgb(255, 255, 255);
-  cursor: text;
+.loading img {
+  margin-bottom: 15px;
 }
 
-img {
-  height: 304px;
-  width: auto;
+.content .container .row:nth-child(2) {
+  align-items: center;
+}
+
+.content .container .row:nth-child(2) .card {
+  background: none;
+  width: 450px;
+}
+
+.content .container .row:nth-child(2) img {
+  height: 240px;
+  width: 450px;
+  padding: 0;
+}
+
+.content .container .row:nth-child(2) .download-button {
+  padding: 10px 35px;
+}
+
+.content .container .row:nth-child(2) .download-button button {
+  width: 350px;
+  height: 50px;
+  border-radius: 10px;
+}
+
+.content .container .row:nth-child(1) {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 50px;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.content .container .row:nth-child(1) input {
+  width: 350px;
+}
+
+.content .container .row:nth-child(1) button {
+  width: 200px;
+  font-size: small;
+}
+
+div#collapse-description {
+  overflow-wrap: anywhere;
 }
 
 .channel {
@@ -80,4 +126,132 @@ footer {
   align-items: center;
   text-align: center;
   padding-bottom: 27px;
+}
+
+@media screen and (max-width: 380px) {
+  .content .container .row:nth-child(1) {
+    padding: 10px 20px;
+  }
+
+  .content .container .row:nth-child(1) input {
+    width: 100%;
+  }
+
+  .content .container .row:nth-child(1) button {
+    width: 100%;
+    font-size: small;
+  }
+
+  .content .container .row:nth-child(2) .card {
+    width: 100%;
+  }
+
+  .content .container .row:nth-child(2) img {
+    height: auto;
+    width: 100%;
+  }
+
+  .content .container .row:nth-child(2) .download-button button {
+    width: 100%;
+    font-size: small;
+  }
+
+  .loading {
+    display: contents;
+  }
+
+  .loading .card {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loading .card img {
+    height: auto;
+    width: 100%;
+  }
+
+  .loading .card .card-body {
+    width: 100%;
+  }
+
+  .loading .card .download-button button {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 550px) and (max-width: 520px) {
+  .content {
+    display: contents;
+  }
+
+  .content .container .row img {
+    height: auto;
+    width: 100%;
+  }
+
+  .content .container .row .download-button button {
+    width: 100%;
+  }
+
+  .loading {
+    display: contents;
+    width: 100%;
+  }
+
+  .loading .container .row {
+    padding: 10px 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .loading .container .row img {
+    height: auto;
+    width: 100%;
+  }
+
+  .loading .container .row .download-button button {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 430px) {
+  main {
+    width: inherit;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .content .container .row {
+    width: 350px;
+  }
+
+  .content .container .row img {
+    height: auto;
+    width: 100%;
+  }
+
+  .content .container .row .download-button button {
+    width: 100%;
+    font-size: smaller;
+  }
+
+  .loading img.card-img-top {
+    max-width: -webkit-fill-available;
+    max-height: -webkit-fill-available;
+  }
+
+  .loading .container .row {
+    padding: 10px;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .loading .container .row .download-button button {
+    width: 100%;
+    font-size: smaller;
+  }
 }

@@ -1,6 +1,6 @@
 const configs = {
     title: 'xcoders - youtube downloader',
-    apikey: 'YOUR APIKEY'
+    url: 'https://cors-fxc7.cloud.okteto.net/'
 };
 
 const formatSize = (bytes) => {
