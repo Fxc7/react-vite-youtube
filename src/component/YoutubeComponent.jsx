@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Card, ListGroup, Modal, Button, Placeholder, Spinner, ProgressBar, Collapse, Container } from 'react-bootstrap';
+import { Card, ListGroup, Modal, Button, Spinner, ProgressBar, Collapse } from 'react-bootstrap';
 import { BiUserCircle, BiGlobe, BiCategory } from 'react-icons/bi';
 import { BsEyeFill, BsSpeedometer2 } from 'react-icons/bs';
 import { GiDuration } from 'react-icons/gi';
+import { toast } from 'sonner';
 
 import config from '../../config.js';
 
@@ -20,7 +21,6 @@ const YoutubeComponent = ({ url }) => {
     const [progressDownload, setProgressDownload] = useState(null);
     const [progressSizeDownload, setProgressSizeDownload] = useState(null);
     const [videoData, setVideoData] = useState(null);
-    const [error, setError] = useState(null);
 
     const configs = config.configs;
     const formatSize = config.formatSize;
@@ -34,23 +34,22 @@ const YoutubeComponent = ({ url }) => {
         setProgressSizeDownload(null);
         setDownload(false);
     };
+
     const handleDownloading = () => setDownload(true);
     const handleDescription = () => setShow(!show);
     const handleMediaClose = (type) => type === 'audio' ? setShowAudio(false) : setShowVideo(false);
     const handleMediaShow = (type) => type === 'audio' ? setShowAudio(true) : setShowVideo(true);
 
-
     const downloadMedia = async (link) => {
         try {
             const startTime = Date.now();
-            const response = await fetch(`${configs.url}${link}`, {
-                method: 'GET'
-            });
+            const response = await fetch(`${configs.url}${link}`);
 
             if (!response.ok) {
-                setError('Failed to fetch the media.');
-                handleSetAll();
-                return;
+                toast('error!!!', {
+                    description: 'Failed to fetch the media.'
+                });
+                return null;
             }
 
             const contentDisposition = response.headers.get('content-disposition');
@@ -71,7 +70,7 @@ const YoutubeComponent = ({ url }) => {
                 chunks.push(value);
                 receivedSize += value.length;
                 setProgressSizeDownload(formatSize(receivedSize));
-                setSpeedDownload(calculateDownloadSpeed(startTime, receivedSize) / 1024)
+                setSpeedDownload(calculateDownloadSpeed(startTime, receivedSize) / 1024);
                 const progress = (receivedSize / totalSize) * 100;
                 setProgressDownload(progress.toFixed());
             }
@@ -87,14 +86,16 @@ const YoutubeComponent = ({ url }) => {
                 URL.revokeObjectURL(url);
                 linkElement.remove();
             });
-            handleSetAll();
         } catch (error) {
             console.error('Error downloading media:', error);
+            toast('error!!!', {
+                description: 'Error downloading media...'
+            });
+            return null;
+        } finally {
             handleSetAll();
-            setError('Error downloading media...');
         }
     };
-
 
     useEffect(() => {
         if (download) {
@@ -112,102 +113,68 @@ const YoutubeComponent = ({ url }) => {
             setExtension('mp4');
             setUrlDownload(videoData.video_url);
         }
-    }, [videoData]);
+    }, [showAudio, showVideo]);
 
     useEffect(() => {
         const fetchVideoData = async () => {
             if (url) {
                 setLoading(true);
-                setError(null);
                 try {
                     const videoDataResponse = await fetch(`${configs.url}youtube/${url}`).then(response => response.json());
-                    
+
                     if (typeof videoDataResponse === 'object' && videoDataResponse) {
                         setLoading(false);
-                        swal('Success', 'Successfully fetched video data', 'success');
+                        toast.success('Successfully...');
                         setTitleDownload('xcoders_-_' + videoDataResponse.title.replaceAll(' ', '_'));
                         setVideoData(videoDataResponse);
                     } else {
-                        setError('Error getting video data.');
+                        setLoading(false);
+                        toast('error!!!', {
+                            description: 'Error getting video data.'
+                        });
                     }
                 } catch (error) {
                     setLoading(false);
-                    setError('Error fetching video data.');
-                    console.error('Error fetching video data:', error);
+                    console.error(error);
+                    toast('error!!!', {
+                        description: 'Error fetching video data.'
+                    });
                 }
             }
         };
         fetchVideoData();
     }, [url]);
 
-    if (error) {
-        swal('Error', error, 'error');
-        handleSetAll();
-        setError(null);
-    }
-
     if (loading) {
         return (
-            <div className="loading animate__animated animate__fadeIn">
-                <Card className="text-center box-3d">
-                    <Card.Img variant="top" src="https://placehold.co/943x504/black/white?font=montserrat&text=Loading..." />
-                    <Card.Body>
-                        <Placeholder as={Card.Title} animation="glow">
-                            <Placeholder xs={10} />
-                        </Placeholder>
-                        <Placeholder as={Card.Text} animation="glow">
-                            <Placeholder xs={6} />
-                            <br />
-                            <Placeholder xs={7} />
-                            <br />
-                            <Placeholder xs={5} />
-                            <br />
-                            <Placeholder xs={4} />
-                            <br />
-                            <Placeholder xs={6} />
-                        </Placeholder>
-                        <Placeholder.Button variant="primary" xs={8} />
-                        <Placeholder.Button variant="primary" xs={8} />
-                    </Card.Body>
-                </Card>
+            <div className="loading-screen">
+                <div className="loading-spinner"></div>
             </div>
         );
     }
+
     if (videoData) {
         return (
             <>
-                <Modal show={showAudio ? showAudio : showVideo} onHide={() => handleMediaClose(showAudio ? 'audio' : 'video')} backdrop="static" keyboard={false} centered>
+                <Modal show={showAudio || showVideo} onHide={() => handleMediaClose(showAudio ? 'audio' : 'video')} backdrop="static" keyboard={false} centered>
                     <Modal.Header>
                         <Modal.Title>Downloaded {showAudio ? 'Audio' : 'Video'}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body style={{ maxHeight: '400px', overflowY: 'auto' }}>
-                        {
-                            download ? (
-                                <>
-                                    <p style={{ fontSize: 'small' }}>Download speed on your network.</p>
-                                    <p style={{ fontSize: 'small' }}>
-                                        <BsSpeedometer2 size={17} /> {`${sizeMedia || 0}/${progressSizeDownload || 0}`} {
-                                            speedDownload ? `${speedDownload.toFixed(2)} KB/s` : ''
-                                        }
-                                    </p>
-                                    <ProgressBar animated now={progressDownload || 0} label={`${progressDownload || 0}%`} />
-                                </>
-                            ) : <p style={{ fontSize: 'small' }}>Do you want to download this media? if so, press the download button to download the media and if you don't want to download the media, just press the cancel button.</p>
-                        }
+                        {download ? (
+                            <>
+                                <p style={{ fontSize: 'small' }}>Download speed on your network.</p>
+                                <p style={{ fontSize: 'small' }}>
+                                    <BsSpeedometer2 size={17} /> {`${sizeMedia || 0}/${progressSizeDownload || 0}`} {speedDownload ? `${speedDownload.toFixed(2)} KB/s` : ''}
+                                </p>
+                                <ProgressBar animated now={progressDownload || 0} label={`${progressDownload || 0}%`} />
+                            </>
+                        ) : <p style={{ fontSize: 'small' }}>Do you want to download this media? If so, press the download button to download the media, and if you don't want to download the media, just press the cancel button.</p>}
                     </Modal.Body>
                     <Modal.Footer>
-                        {
-                            !download ? <Button variant="danger" onClick={() => {
-                                handleMediaClose(showAudio ? 'audio' : 'video');
-                                handleSetAll();
-                            }}>
-                                Cancel
-                            </Button> : ''
-                        }
+                        {!download ? <Button variant="danger" onClick={() => handleMediaClose(showAudio ? 'audio' : 'video')}>Cancel</Button> : null}
                         <Button variant="success" onClick={handleDownloading}>
-                            {
-                                download ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : ''
-                            }{' '}Download
+                            {download ? <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true" /> : null} Download
                         </Button>
                     </Modal.Footer>
                 </Modal>
@@ -215,50 +182,32 @@ const YoutubeComponent = ({ url }) => {
                     <Card.Img variant="top" src={videoData.thumbnail} alt="Video Thumbnail" />
                     <Card.Body className="text-center">
                         <ListGroup className="list-group-flush justify-content-between" style={{ borderRadius: '5px' }}>
-                            {
-
-                                videoData?.title ? <ListGroup.Item variant="primary"><span className="text-sm">{videoData.title}</span></ListGroup.Item> : ''
-                            }
-                            {
-                                videoData?.channel_name ? <ListGroup.Item variant="primary"><Card.Link className="channel" href={videoData.channel_url} target="_blank"><BiUserCircle size={19} /> {videoData.channel_name}</Card.Link></ListGroup.Item> : ''
-                            }
-                            {
-                                <ListGroup.Item variant="primary"><GiDuration /> <span className="duration">{videoData.duration}</span></ListGroup.Item>
-                            }
-                            {
-                                videoData?.published_at ? <ListGroup.Item variant="primary"><BiGlobe /> <span className="published">{videoData.published_at}</span></ListGroup.Item> : ''
-                            }
-                            {
-                                videoData?.category ? <ListGroup.Item variant="primary"><BiCategory /> <span className="category">{videoData.category}</span></ListGroup.Item> : ''
-                            }
-                            {
-                                videoData?.views_count ? <ListGroup.Item variant="primary"><BsEyeFill /> <span className="views">{videoData.views_count}</span></ListGroup.Item> : ''
-                            }
-                            {
-                                videoData?.description ? <ListGroup.Item action variant="primary" onClick={handleDescription} aria-controls="collapse-description" aria-expanded={show}>
-                                    <Card.Text>Click {!show ? 'Show' : 'Hide'} Description</Card.Text>
-                                </ListGroup.Item> : ''
-                            }
-                            {
-                                show ? <ListGroup.Item className="animate__animated animate__fadeIn" variant={show ? 'primary' : ''}>
+                            {videoData?.title ? <ListGroup.Item variant="primary"><span className="text-sm">{videoData.title}</span></ListGroup.Item> : null}
+                            {videoData?.channel_name ? <ListGroup.Item variant="primary"><Card.Link className="channel" href={videoData.channel_url} target="_blank"><BiUserCircle size={19} /> {videoData.channel_name}</Card.Link></ListGroup.Item> : null}
+                            {videoData?.duration ? <ListGroup.Item variant="primary"><GiDuration /> <span className="duration">{videoData.duration}</span></ListGroup.Item> : null}
+                            {videoData?.published_at ? <ListGroup.Item variant="primary"><BiGlobe /> <span className="published">{videoData.published_at}</span></ListGroup.Item> : null}
+                            {videoData?.category ? <ListGroup.Item variant="primary"><BiCategory /> <span className="category">{videoData.category}</span></ListGroup.Item> : null}
+                            {videoData?.views_count ? <ListGroup.Item variant="primary"><BsEyeFill /> <span className="views">{videoData.views_count}</span></ListGroup.Item> : null}
+                            {videoData?.description ? <ListGroup.Item action variant="primary" onClick={handleDescription} aria-controls="collapse-description" aria-expanded={show}>
+                                <Card.Text>Click {!show ? 'Show' : 'Hide'} Description</Card.Text>
+                            </ListGroup.Item> : null}
+                            {show ? (
+                                <ListGroup.Item className="animate__animated animate__fadeIn" variant={show ? 'primary' : ''}>
                                     <Collapse in={show}>
                                         <div id="collapse-description">
-                                            <Card.Text>
-                                                {videoData.description}
-                                            </Card.Text>
+                                            <Card.Text>{videoData.description}</Card.Text>
                                         </div>
                                     </Collapse>
-                                </ListGroup.Item> : ''
-                            }
+                                </ListGroup.Item>
+                            ) : null}
                         </ListGroup>
                         <div className="download-button">
-                            <Button className="px-5" onClick={() => {
+                            <Button className="px-5 elegant" onClick={() => {
                                 handleMediaShow('video');
                                 setExtension('mp4');
                                 setUrlDownload(videoData.video_url);
-                            }
-                            }>Video</Button>
-                            <Button className="px-5" onClick={() => {
+                            }}>Video</Button>
+                            <Button className="px-5 elegant" onClick={() => {
                                 handleMediaShow('audio');
                                 setExtension('mp3');
                                 setUrlDownload(videoData.audio_url);
@@ -269,6 +218,8 @@ const YoutubeComponent = ({ url }) => {
             </>
         );
     }
+
+    return null;
 };
 
 export default YoutubeComponent;
